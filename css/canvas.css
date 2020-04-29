@@ -1,0 +1,16 @@
+.Canvas {
+    width: 100%;
+    text-align: center;
+}
+
+.Canvas canvas {
+    display: inline-block;
+    border: 2px solid rgba(0, 0, 0, 1);
+    width: 30%;
+}
+
+@media screen and (max-width: 700px) {
+    .Canvas canvas {
+        width: 90%;
+    }
+}
