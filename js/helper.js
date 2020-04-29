@@ -25,6 +25,9 @@ function get_mouse_pos(canvas, e) {
     };
 }
 
+/**
+ * Returns nxn array of zeros
+ */
 function zeros(n){
     return [...Array(n)].map(e => Array(n).fill(0));
 }
