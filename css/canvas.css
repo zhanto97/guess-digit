@@ -11,6 +11,6 @@
 
 @media screen and (max-width: 700px) {
     .Canvas canvas {
-        width: 90%;
+        width: 80%;
     }
 }

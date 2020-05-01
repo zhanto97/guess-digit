@@ -18,7 +18,7 @@ function predict_digit(){
     var image = zeros(GRID_SHAPE);
     for (var i = 0; i < GRID_SHAPE; i++){
         for (var j = 0; j < GRID_SHAPE; j++){
-            image[i][j] = [STATE[i][j]];
+            image[i][j] = [STATE[i][j] / 255.0];
         }
     }
     image = tf.tensor4d([image]);
@@ -70,24 +70,24 @@ function setup_drawing_listeners(){
             var grid_width = CANVAS.width / GRID_SHAPE;
             var grid_height = CANVAS.height / GRID_SHAPE;
 
-            context.fillStyle = color;
-            context.fillRect(x*grid_width, y*grid_height, grid_width, grid_height);
+            var strength = Math.min(255, STATE[y][x] + color)
+            STATE[y][x] = strength;
 
-            if (color == 'rgba(0, 0, 0, 1)')
-                STATE[y][x] = 255;
-            else if (STATE[y][x] != 255)
-                STATE[y][x] = 127;
+            var style = 'rgba(0, 0, 0, ' + (strength/255).toFixed(2) + ')';
+            context.fillStyle = style;
+            context.fillRect(x*grid_width, y*grid_height, grid_width, grid_height);
         }
     }
 
+    // Laptop listeners for drawing
     CANVAS.addEventListener("mousedown", function (e) {
         DRAWING = true;
         var coord = get_mouse_pos(CANVAS, e);
-        fillGrid(coord.x, coord.y, 'rgba(0, 0, 0, 1)');
-        fillGrid(coord.x - 1, coord.y, 'rgba(0, 0, 0, 0.5)');
-        fillGrid(coord.x + 1, coord.y, 'rgba(0, 0, 0, 0.5)');
-        fillGrid(coord.x, coord.y - 1, 'rgba(0, 0, 0, 0.5)');
-        fillGrid(coord.x, coord.y + 1, 'rgba(0, 0, 0, 0.5)');
+        fillGrid(coord.x, coord.y, 75);
+        fillGrid(coord.x - 1, coord.y, 75);
+        fillGrid(coord.x + 1, coord.y, 75);
+        fillGrid(coord.x, coord.y - 1, 75);
+        fillGrid(coord.x, coord.y + 1, 75);
     });
 
     CANVAS.addEventListener("mouseup", function (e) {
@@ -97,11 +97,41 @@ function setup_drawing_listeners(){
     CANVAS.addEventListener("mousemove", function (e) {
         if (DRAWING){
             var coord = get_mouse_pos(CANVAS, e);
-            fillGrid(coord.x, coord.y, 'rgba(0, 0, 0, 1)');
-            fillGrid(coord.x - 1, coord.y, 'rgba(0, 0, 0, 0.5)');
-            fillGrid(coord.x + 1, coord.y, 'rgba(0, 0, 0, 0.5)');
-            fillGrid(coord.x, coord.y - 1, 'rgba(0, 0, 0, 0.5)');
-            fillGrid(coord.x, coord.y + 1, 'rgba(0, 0, 0, 0.5)');
+            fillGrid(coord.x, coord.y, 75);
+            fillGrid(coord.x - 1, coord.y, 75);
+            fillGrid(coord.x + 1, coord.y, 75);
+            fillGrid(coord.x, coord.y - 1, 75);
+            fillGrid(coord.x, coord.y + 1, 75);
         }
     });
+
+    // Phone and tablet listeners for drawing
+    CANVAS.addEventListener("touchstart", function (e) {
+        var mouseEvent = new MouseEvent("mousedown", {
+            clientX: e.touches[0].clientX,
+            clientY: e.touches[0].clientY
+        });
+        CANVAS.dispatchEvent(mouseEvent);
+    });
+
+    CANVAS.addEventListener("touchend", function (e) {
+        CANVAS.dispatchEvent(new MouseEvent("mouseup", {}));
+    });
+
+    CANVAS.addEventListener("touchmove", function (e) {
+        var mouseEvent = new MouseEvent("mousemove", {
+            clientX: e.touches[0].clientX,
+            clientY: e.touches[0].clientY
+        });
+        CANVAS.dispatchEvent(mouseEvent);
+    });
+
+    // Prevents scrolling when drawing on phones and tablets
+    function prevent_scrolling(e) {
+        if (e.target == CANVAS)
+            e.preventDefault();
+    }
+    document.addEventListener("touchstart", prevent_scrolling, {passive: false});
+    document.addEventListener("touchend", prevent_scrolling, {passive: false});
+    document.addEventListener("touchmove", prevent_scrolling, {passive: false});
 }
